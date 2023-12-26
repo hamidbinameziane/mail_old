@@ -4,6 +4,14 @@ textarea {
 
 #emails-view > div {
     border: 1px solid black;
+    width: 80%;
+    display: inline-block;
+    color: black;
+
+}
+#emails-view > button {
+    padding: 2px;
+    margin-left: 5px;
 
 }
 

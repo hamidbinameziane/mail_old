@@ -34,6 +34,10 @@ function load_mailbox(mailbox) {
   document.querySelector('#display-email').innerHTML = ""
   
 
+
+  
+  
+
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
@@ -45,7 +49,7 @@ function load_mailbox(mailbox) {
       // Print emails
       //console.log(emails);
       emails.forEach(element => {
-        console.log(element);
+        //console.log(element);
         const divs = document.createElement('div');
         const divs2 = document.createElement('div');
         const spans = document.createElement('span');
@@ -61,10 +65,14 @@ function load_mailbox(mailbox) {
         const spans11 = document.createElement('span');
         const div3 = document.createElement('div');
         const replay_b = document.createElement('button');
+        const archive_b = document.createElement('button');
+        const archive2_b = document.createElement('button');
         spans.innerHTML = element.sender;
+        spans.style.float = 'left';
         spans.style.fontWeight = 'bold'
         divs.append(spans)
         spans2.innerHTML = element.subject;
+        spans2.style.float = 'left';
         divs.append(spans2)
         spans3.innerHTML = element.timestamp;
         spans3.style.float = 'right';
@@ -89,37 +97,72 @@ function load_mailbox(mailbox) {
             spans4.innerHTML = 'From: ';
             spans4.style.fontWeight = 'bold'
             divs2.append(spans4)
-            spans5.innerHTML = `${element.sender}<br>`;           
+            spans5.innerHTML = `${email.sender}<br>`;           
             divs2.append(spans5)
             spans6.innerHTML = 'To: ';
             spans6.style.fontWeight = 'bold'
             divs2.append(spans6)
-            spans7.innerHTML = `${element.recipients}<br>`;           
+            spans7.innerHTML = `${email.recipients}<br>`;           
             divs2.append(spans7)
             spans8.innerHTML = 'Subject: ';
             spans8.style.fontWeight = 'bold'
             divs2.append(spans8)
-            spans9.innerHTML = `${element.subject}<br>`;           
+            spans9.innerHTML = `${email.subject}<br>`;           
             divs2.append(spans9)
             spans10.innerHTML = 'Timestamp: ';
             spans10.style.fontWeight = 'bold'
             divs2.append(spans10)
-            spans11.innerHTML = `${element.timestamp}<br>`;           
+            spans11.innerHTML = `${email.timestamp}<br>`;           
             divs2.append(spans11)
             replay_b.innerHTML = 'Replay'
             replay_b.setAttribute('class', 'btn btn-sm btn-outline-primary');
             divs2.append(replay_b)
-            div3.innerHTML = `<hr>${element.body}`;           
+            div3.innerHTML = `<hr>${email.body}`;           
             divs2.append(div3)
-            // Print email
-            console.log(email);
             document.querySelector('#display-email').append(divs2);
-              // ... do something else with email ...
           });
         });
+        divs.setAttribute('class', 'btn');
         document.querySelector('#emails-view').append(divs);
+        if (mailbox == 'inbox') {
+          archive_b.innerHTML = 'Archive'
+          archive_b.setAttribute('class', 'btn btn-primary btn-sm');
+          document.querySelector('#emails-view').append(archive_b)
+          archive_b.addEventListener('click', function() {
+            fetch(`/emails/${element.id}`, {
+              method: 'PUT',
+              body: JSON.stringify({
+                archived: true
+              })
+            })
+            setTimeout(() => {
+              load_mailbox('inbox')
+            }, 50)
+            })
+          }
+          else if (mailbox == 'archive') {
+            archive2_b.setAttribute('class', 'btn btn-secondary btn-sm');
+            archive2_b.innerHTML = 'Unarchive'
+            document.querySelector('#emails-view').append(archive2_b)
+            archive2_b.addEventListener('click', function() {
+              fetch(`/emails/${element.id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                  archived: false
+                })
+                
+              })
+              setTimeout(() => {
+                load_mailbox('inbox')
+              }, 50)
+              
+          })
+          }
+          
         
-      });
+        
+        
+      }) ;
   
       // ... do something else with emails ...
   });
@@ -127,7 +170,7 @@ function load_mailbox(mailbox) {
 
 function send_email() {
   const rcps = document.querySelector('#compose-recipients').value;
-  console.log(rcps);
+  //console.log(rcps);
   const sbjt = document.querySelector('#compose-subject').value;
   const bd = document.querySelector('#compose-body').value;
   fetch('/emails', {
@@ -141,7 +184,7 @@ function send_email() {
   .then(response => response.json())
   .then(result => {
       // Print result
-      console.log(result);
+      //console.log(result);
   });
   load_mailbox('sent')
   return false;
