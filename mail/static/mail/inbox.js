@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+  globalThis.rcps = document.querySelector('#compose-recipients');
+  globalThis.sbjt = document.querySelector('#compose-subject');
+  globalThis.bd = document.querySelector('#compose-body');
 
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
@@ -25,6 +28,15 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 }
 
+function replay_email() {
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#display-email').style.display = 'none'
+  document.querySelector('#compose-view').style.display = 'block';
+
+}
+
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
@@ -32,6 +44,8 @@ function load_mailbox(mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#display-email').style.display = 'none'
   document.querySelector('#display-email').innerHTML = ""
+
+
   
 
 
@@ -63,7 +77,7 @@ function load_mailbox(mailbox) {
         const spans9 = document.createElement('span');
         const spans10 = document.createElement('span');
         const spans11 = document.createElement('span');
-        const div3 = document.createElement('div');
+        const div3 = document.createElement('textarea');
         const replay_b = document.createElement('button');
         const archive_b = document.createElement('button');
         const archive2_b = document.createElement('button');
@@ -116,8 +130,20 @@ function load_mailbox(mailbox) {
             divs2.append(spans11)
             replay_b.innerHTML = 'Replay'
             replay_b.setAttribute('class', 'btn btn-sm btn-outline-primary');
+            replay_b.addEventListener('click', function() {
+              rcps.value = email.sender
+              if (email.subject.startsWith('Re: ')) {
+                sbjt.value = email.subject
+              }
+              else {
+                sbjt.value = `Re: ${email.subject}`
+              }
+              bd.value = `"On ${email.timestamp} ${email.sender} wrote: ${email.body}"`
+              replay_email()
+            })
             divs2.append(replay_b)
-            div3.innerHTML = `<hr>${email.body}`;           
+            div3.innerHTML = `${email.body}`;
+            div3.setAttribute('class', 'form-control');         
             divs2.append(div3)
             document.querySelector('#display-email').append(divs2);
           });
@@ -169,16 +195,13 @@ function load_mailbox(mailbox) {
 }
 
 function send_email() {
-  const rcps = document.querySelector('#compose-recipients').value;
-  //console.log(rcps);
-  const sbjt = document.querySelector('#compose-subject').value;
-  const bd = document.querySelector('#compose-body').value;
+
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
-        recipients: rcps,
-        subject: sbjt,
-        body: bd
+        recipients: rcps.value,
+        subject: sbjt.value,
+        body: bd.value
     })
   })
   .then(response => response.json())
